@@ -23,16 +23,24 @@ function repositionRaidWindow()
         raidFrame:AddAnchor("TOPLEFT", "UIParent", settings.raidFrameX, settings.raidFrameY)
     end 
     return true
+end
+
+local function saveRaidPosition(raidFrame)
+    local settings = api.GetSettings("sticky_ui")
+    local raidWindowX, raidWindowY = raidFrame:GetOffset()
+    settings.raidFrameX = raidWindowX
+    settings.raidFrameY = raidWindowY
+    api.SaveSettings()
 end 
 
 -- Moving Raid Frame Timer
 local moveRaidFrameFlag = false
 local moveRaidFrameTimer = 0
-local moveRaidFrameTickRate = 500
+local moveRaidFrameTickRate = 200
 -- Saving Raid Frame to settings Timer
 local saveRaidFrameXYFlag = false
 local saveRaidFrameXYTimer = 0
-local saveRaidFrameXYTickRate = 10000
+local saveRaidFrameXYTickRate = 15000
 
 local function OnUpdate(dt)
     if moveRaidFrameFlag == true then 
@@ -43,18 +51,18 @@ local function OnUpdate(dt)
             moveRaidFrameTimer = 0
         end 
     end 
-    if saveRaidFrameXYFlag == true and raidFrame ~= nil then
-        saveRaidFrameXYTimer = saveRaidFrameXYTimer + dt
-        if saveRaidFrameXYTimer > saveRaidFrameXYTickRate then 
-            local settings = api.GetSettings("sticky_ui")
-            local raidWindowX, raidWindowY = raidFrame:GetOffset()
-            settings.raidFrameX = raidWindowX
-            settings.raidFrameY = raidWindowY
-            api.SaveSettings()
+    -- if saveRaidFrameXYFlag == true and raidFrame ~= nil then
+    --     saveRaidFrameXYTimer = saveRaidFrameXYTimer + dt
+    --     if saveRaidFrameXYTimer > saveRaidFrameXYTickRate then 
+    --         local settings = api.GetSettings("sticky_ui")
+    --         local raidWindowX, raidWindowY = raidFrame:GetOffset()
+    --         settings.raidFrameX = raidWindowX
+    --         settings.raidFrameY = raidWindowY
+    --         api.SaveSettings()
 
-            saveRaidFrameXYTimer = 0
-        end 
-    end 
+    --         saveRaidFrameXYTimer = 0
+    --     end 
+    -- end 
 end
 
 local function OnLoad()
@@ -134,6 +142,23 @@ local function OnLoad()
         moveRaidFrameFlag = true
         -- allow raid frame position to be saved to settings
         saveRaidFrameXYFlag = true
+
+        local savePosBtn = frame:CreateChildWidget("button", "savePosBtn", 0, true)
+        -- Toggle back to maximized view with this button
+        savePosBtn:SetExtent(50, 20)
+        savePosBtn:AddAnchor("TOPLEFT", frame, 0, -3)
+        savePosBtn:SetText("Save UI")
+        local savePosBtnTexture = savePosBtn:CreateImageDrawable(TEXTURE_PATH.HUD, "background")
+        savePosBtnTexture:SetTextureInfo("tab_chat_select")
+        --savePosBtnTexture:SetWidth(50)
+        savePosBtnTexture:SetColor(0, 0, 0, 0.4)
+        -- savePosBtnTexture:SetTexture(TEXTURE_PATH.HUD)
+        -- savePosBtnTexture:SetCoords(754, 94, 26, 28)
+        savePosBtnTexture:AddAnchor("TOPLEFT", savePosBtn, 0, 0)
+        savePosBtnTexture:SetExtent(50, 20)
+        frame.savePosBtn:SetHandler("OnClick", function()
+            saveRaidPosition(raidFrame)
+        end)
 
         -- Overwrite the ondragstop event to save raid position settings
         -- api.DoIn(500, api.Log:Info("Hello"))
